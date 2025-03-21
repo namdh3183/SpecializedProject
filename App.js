@@ -1,7 +1,13 @@
-import { View } from "react-native"
+import React from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import MainRouters from "./CustomerRouters/MainRouters";
 
 const App = () => {
-  return(
-    <View><Text>Hello xin chao</Text></View>
-  )
-}
+  return (
+    <NavigationContainer>
+      <MainRouters/>
+    </NavigationContainer>
+  );
+};
+
+export default App;
