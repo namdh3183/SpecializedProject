@@ -60,6 +60,10 @@ const BookingScreen = ({ navigation }) => {
         <TouchableOpacity style={styles.button} onPress={() => alert("Đặt sân thành công!")}>
           <Text style={styles.buttonText}>Xác nhận đặt sân</Text>
         </TouchableOpacity>
+
+         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                <Text style={styles.backText}>Trở về</Text>
+          </TouchableOpacity>
       </ScrollView>
     </View>
   );
