@@ -1,25 +1,39 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+
+import auth from '@react-native-firebase/auth';
 
 export default function RegisterScreen({ navigation }) {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleRegister = () => {
-    // Add registration logic here (e.g., API call)
-    alert('Account created successfully!');
-    navigation.goBack(); // Navigate back to Login
+  // Email Registration
+  const handleEmailRegistration = async () => {
+    try {
+      const userCredential = await auth().createUserWithEmailAndPassword(email, password);
+      const user = userCredential.user;
+      Alert.alert("Account Created", `Welcome, ${user.email}!`);
+      console.log("Registered User:", user);
+      navigation.replace("MainRouters"); // Navigate to main app screen
+    } catch (error) {
+      console.error("Registration Error:", error);
+      Alert.alert("Registration Failed", error.message);
+    }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Register</Text>
+      {/* Email Input */}
       <TextInput
         style={styles.input}
-        placeholder="Username"
-        value={username}
-        onChangeText={setUsername}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
       />
+      {/* Password Input */}
       <TextInput
         style={styles.input}
         placeholder="Password"
@@ -27,10 +41,8 @@ export default function RegisterScreen({ navigation }) {
         onChangeText={setPassword}
         secureTextEntry
       />
-      <Button title="Sign Up" onPress={handleRegister} />
-      <TouchableOpacity onPress={() => navigation.goBack()}>
-        <Text style={styles.link}>Already have an account? Login</Text>
-      </TouchableOpacity>
+      {/* Registration Button */}
+      <Button title="Register" onPress={handleEmailRegistration} />
     </View>
   );
 }
@@ -53,10 +65,5 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 4,
     padding: 12,
-  },
-  link: {
-    marginTop: 16,
-    color: 'blue',
-    textAlign: 'center',
   },
 });
