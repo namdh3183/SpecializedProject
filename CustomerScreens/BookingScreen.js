@@ -67,6 +67,7 @@ const BookingScreen = ({ navigation }) => {
       </ScrollView>
     </View>
   );
+  
 };
 
 const styles = StyleSheet.create({
