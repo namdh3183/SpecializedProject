@@ -158,6 +158,7 @@ export default function LoginScreen({ navigation }) {
         <Text style={styles.link}>Don't have an account? Sign Up</Text>
       </TouchableOpacity>
 
+
       <View style={styles.separator} />
       <Text style={{ opacity: 0.6, marginBottom: 20 }}>or</Text>
 
@@ -200,23 +201,6 @@ const styles = StyleSheet.create({
   passwordContainer: {
     flexDirection: 'row',
     marginBottom: 16,
-    alignItems: 'center',
-  },
-  googleButton: {
-    backgroundColor: '#DB4437',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  linkButton: {
-    marginBottom: 12,
-    alignItems: 'center',
-  },
-  linkText: {
-    color: '#007AFF',
-    fontSize: 14,
   },
   link: {
     color: '#3f278f',
