@@ -4,8 +4,9 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import ManageScreen from '../ManagerScreens/Manage';
 import InventoryScreen from '../ManagerScreens/Inventory';
-import SettingScreen from '../ManagerScreens/Setting';
 import RevenueScreen from '../ManagerScreens/Revenue';
+import SettingScreen from '../ManagerScreens/Setting';
+import ManageRouter from '../ManagerRouters/ManageRouter';
 
 const Tab = createBottomTabNavigator();
 
@@ -13,33 +14,44 @@ export default function ManagerMainRouter() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        // Add icon based on the current route name
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
+        headerStyle: {
+          backgroundColor: '#ffffff', // Header background color (same as tab bar)
+        },
+        headerTintColor: '#3f278f', // Header text color (Deep Purple)
+        tabBarIcon: ({ focused, color }) => {
+          const iconSize = 30;
+          let iconName = '';
 
           if (route.name === 'Manage') {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'Inventory') {
             iconName = focused ? 'list' : 'list-outline';
-          } else if (route.name === 'Setting') {
-            iconName = focused ? 'settings' : 'settings-outline';
           } else if (route.name === 'Revenue') {
             iconName = focused ? 'cash' : 'cash-outline';
+          } else if (route.name === 'Setting') {
+            iconName = focused ? 'settings' : 'settings-outline';
           }
 
-          // Return the icon component
-          return <Ionicons name={iconName} size={size} color={color} />;
+          return <Ionicons name={iconName} size={iconSize} color={color} />;
         },
-        // Customize active and inactive colors
-        tabBarActiveTintColor: 'tomato',
-        tabBarInactiveTintColor: 'gray',
+        tabBarActiveTintColor: '#3f278f', // Deep Purple for active tab
+        tabBarInactiveTintColor: '#ed85be', // Light Pink for inactive tab
+        tabBarStyle: {
+          backgroundColor: '#ffffff', // White background for tab bar
+          borderTopColor: '#e3c87f',    // Light Yellow top border (optional)
+          height: 70,                  // Increased tab bar height
+          paddingTop: 5,              // Extra top padding
+        },
+        tabBarLabelStyle: {
+          fontSize: 14,
+          marginBottom: 10,
+        },
       })}
     >
-      <Tab.Screen name="Manage" component={ManageScreen} />
+      <Tab.Screen name="Manage" component={ManageRouter} />
       <Tab.Screen name="Inventory" component={InventoryScreen} />
       <Tab.Screen name="Revenue" component={RevenueScreen} />
       <Tab.Screen name="Setting" component={SettingScreen} />
     </Tab.Navigator>
-
   );
 }

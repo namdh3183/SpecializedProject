@@ -1,7 +1,9 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Button } from "react-native";
 
 const Home = ({ navigation }) => {
+  
+
   return (
     <View style={styles.container}>
       {/* Tiêu đề */}
@@ -43,9 +45,12 @@ const Home = ({ navigation }) => {
         >
           <Text style={styles.menuText}>Đánh giá</Text>
         </TouchableOpacity>
+
       </ScrollView>
     </View>
   );
+
+  
 };
 
 const styles = StyleSheet.create({
