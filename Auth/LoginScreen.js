@@ -1,9 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  Dimensions,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import auth from '@react-native-firebase/auth';
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import firestore from '@react-native-firebase/firestore';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -12,11 +21,10 @@ export default function LoginScreen({ navigation }) {
 
   useEffect(() => {
     GoogleSignin.configure({
-      webClientId: "525095539327-32qp8icaj3u4uu96c7441i1d1oov4fuv.apps.googleusercontent.com",
+      webClientId: '525095539327-32qp8icaj3u4uu96c7441i1d1oov4fuv.apps.googleusercontent.com',
     });
   }, []);
 
-  // Create a new user document if not exists
   const createOrUpdateUser = async (user) => {
     const userDoc = firestore().collection('users').doc(user.uid);
     const userSnapshot = await userDoc.get();
@@ -25,21 +33,19 @@ export default function LoginScreen({ navigation }) {
       await userDoc.set({
         uid: user.uid,
         email: user.email,
-        role: 'customer' // Default role
+        role: 'customer',
       });
     }
   };
 
-  // Validate user inputs for email sign-in
   const validateInputs = () => {
     if (email.trim() === '' || password.trim() === '') {
-      Alert.alert("Incomplete Information", "Please enter both email and password.");
+      Alert.alert('Incomplete Information', 'Please enter both email and password.');
       return false;
     }
     return true;
   };
 
-  // Fetch user role from Firestore
   const getUserRole = async (uid) => {
     try {
       const userDoc = await firestore().collection('users').doc(uid).get();
@@ -51,74 +57,65 @@ export default function LoginScreen({ navigation }) {
         return 'customer';
       }
     } catch (error) {
-      console.error("Error fetching user role:", error);
+      console.error('Error fetching user role:', error);
       return 'customer';
     }
   };
 
-  // Handle email/password sign-in
   const handleEmailSignIn = async () => {
-    
     if (!validateInputs()) return;
 
     try {
       const userCredential = await auth().signInWithEmailAndPassword(email, password);
       const user = userCredential.user;
-      
-      // Fetch user role from Firestore
       const role = await getUserRole(user.uid);
+
       if (role === 'manager') {
-        navigation.replace("ManagerMainRouter");
+        navigation.replace('ManagerMainRouter');
       } else {
-        navigation.replace("MainRouters");
+        navigation.replace('MainRouters');
       }
 
-      Alert.alert("Signed In", `Welcome back, ${user.email}!`);
+      Alert.alert('Signed In', `Welcome back, ${user.email}!`);
     } catch (error) {
-      console.error("Email Sign-In Error:", error);
-      Alert.alert("Sign In Failed", error.message);
+      console.error('Email Sign-In Error:', error);
+      Alert.alert('Sign In Failed', error.message);
     }
   };
 
-  // Handle Google Sign-In
   const onGoogleButtonPress = async () => {
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
       const signInResult = await GoogleSignin.signIn();
 
-      // Try to get the ID token from the sign-in result.
       let idToken = signInResult.idToken || signInResult.data?.idToken;
-
-      // Fallback: if no idToken is found, explicitly get tokens.
       if (!idToken) {
         const tokens = await GoogleSignin.getTokens();
         idToken = tokens.idToken;
       }
 
-      if (!idToken) {
-        throw new Error("No ID token found");
-      }
+      if (!idToken) throw new Error('No ID token found');
 
-      // Create a Google credential with the token
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
       const userCredential = await auth().signInWithCredential(googleCredential);
       const user = userCredential.user;
 
       await createOrUpdateUser(user);
 
-      // Fetch role for navigation consistency
       const role = await getUserRole(user.uid);
       if (role === 'manager') {
-        navigation.replace("ManagerMainRouter");
+        navigation.replace('ManagerMainRouter');
       } else {
-        navigation.replace("MainRouters");
+        navigation.replace('MainRouters');
       }
 
-      // Use Alert.alert for consistency
-      Alert.alert("Signed In with Google", `Welcome, ${user.displayName || "User"}!\nUID: ${user.uid}\nEmail: ${user.email}`);
+      Alert.alert(
+        'Signed In with Google',
+        `Welcome, ${user.displayName || 'User'}!\nUID: ${user.uid}\nEmail: ${user.email}`
+      );
     } catch (error) {
-      console.error("Error during Google Sign-In:", error);
-      Alert.alert("Google Sign-In Failed", error.message);
+      console.error('Google Sign-In Error:', error);
+      Alert.alert('Google Sign-In Failed', error.message);
     }
   };
 
@@ -134,9 +131,10 @@ export default function LoginScreen({ navigation }) {
         keyboardType="email-address"
         autoCapitalize="none"
       />
+
       <View style={styles.passwordContainer}>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { flex: 1 }]}
           placeholder="Password"
           value={password}
           onChangeText={setPassword}
@@ -144,20 +142,28 @@ export default function LoginScreen({ navigation }) {
         />
         <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)}>
           <Icon
-            name={passwordVisible ? "visibility" : "visibility-off"}
+            name={passwordVisible ? 'visibility' : 'visibility-off'}
             size={24}
             color="#3f278f"
             style={styles.icon}
           />
         </TouchableOpacity>
       </View>
+
+      <TouchableOpacity
+        onPress={() => navigation.navigate('ResetPassword')}
+        style={styles.forgotPasswordContainer}
+      >
+        <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+      </TouchableOpacity>
+
       <View style={styles.button}>
         <Button title="Sign In with Email" onPress={handleEmailSignIn} color="#ed85be" />
       </View>
-      <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+
+      <TouchableOpacity onPress={() => navigation.navigate('Register')}>
         <Text style={styles.link}>Don't have an account? Sign Up</Text>
       </TouchableOpacity>
-
 
       <View style={styles.separator} />
       <Text style={{ opacity: 0.6, marginBottom: 20 }}>or</Text>
@@ -169,17 +175,13 @@ export default function LoginScreen({ navigation }) {
   );
 }
 
-import { Dimensions } from 'react-native';
-
 const screenWidth = Dimensions.get('window').width;
-const screenHeight = Dimensions.get('window').height;
 
-console.log(`Screen Width: ${screenWidth}, Screen Height: ${screenHeight}`);
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: "center",
+    alignItems: 'center',
     paddingHorizontal: 16,
     backgroundColor: '#ffffff',
   },
@@ -200,7 +202,26 @@ const styles = StyleSheet.create({
   },
   passwordContainer: {
     flexDirection: 'row',
-    marginBottom: 16,
+    alignItems: 'center',
+    marginBottom: 8,
+    width: screenWidth - 35,
+  },
+  icon: {
+    marginLeft: -35,
+  },
+  forgotPasswordContainer: {
+    alignSelf: 'flex-end',
+    marginRight: 10,
+    marginBottom: 12,
+  },
+  forgotPasswordText: {
+    color: '#3f278f',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  button: {
+    marginBottom: 12,
+    width: screenWidth - 35,
   },
   link: {
     color: '#3f278f',
@@ -211,12 +232,4 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     width: screenWidth - 200,
   },
-  button: {
-    marginBottom: 12,
-    width: screenWidth - 35,
-  },
-  icon: {
-    marginStart: -35,
-    marginVertical: 10,
-  }
 });

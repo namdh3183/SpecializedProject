@@ -2,7 +2,7 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Icon from "react-native-vector-icons/Ionicons";
 
-// Import màn hình
+// Import screens
 import EmptyScreen from "./EmptyScreen";
 import HistoryScreen from "./HistoryScreen";
 import ProfileScreen from "./ProfileScreen";
@@ -20,20 +20,20 @@ const Home = () => {
           let iconName;
 
           switch (route.name) {
-            case "Trang chủ":
+            case "Home":
               iconName = "home-outline";
               break;
             
-            case "Lịch sử":
+            case "History":
               iconName = "time-outline";
               break;
-            case "Cá nhân":
+            case "Profile":
               iconName = "person-outline";
               break;
-            case "Thanh toán":
+            case "Payment":
               iconName = "card-outline";
               break;
-            case "Đánh giá":
+            case "Review":
               iconName = "star-outline";
               break;
             default:
@@ -46,11 +46,11 @@ const Home = () => {
         tabBarInactiveTintColor: "gray",
       })}
     >
-      <Tab.Screen name="Trang chủ" component={EmptyScreen} />
-      <Tab.Screen name="Lịch sử" component={HistoryScreen} />
-      <Tab.Screen name="Cá nhân" component={ProfileScreen} />
-      <Tab.Screen name="Thanh toán" component={PaymentScreen} />
-      <Tab.Screen name="Đánh giá" component={ReviewScreen} />
+      <Tab.Screen name="Home" component={EmptyScreen} />
+      <Tab.Screen name="History" component={HistoryScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Payment" component={PaymentScreen} />
+      <Tab.Screen name="Review" component={ReviewScreen} />
     </Tab.Navigator>
   );
 };
