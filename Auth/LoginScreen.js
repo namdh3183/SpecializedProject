@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-
 import auth from '@react-native-firebase/auth';
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
@@ -8,7 +7,6 @@ export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // Configure Google Sign-In when the screen is loaded
   useEffect(() => {
     GoogleSignin.configure({
       webClientId: "525095539327-32qp8icaj3u4uu96c7441i1d1oov4fuv.apps.googleusercontent.com",
@@ -19,50 +17,31 @@ export default function LoginScreen({ navigation }) {
     navigation.replace("ManagerMainRouter");
   };
 
-  // Email and Password Sign-In
   const handleEmailSignIn = async () => {
     try {
       const userCredential = await auth().signInWithEmailAndPassword(email, password);
       const user = userCredential.user;
       Alert.alert("Signed In", `Welcome back, ${user.email}!`);
-      console.log("Signed In User:", user);
-      navigation.replace("MainRouters"); // Navigate to main app screen
+      navigation.replace("MainRouters");
     } catch (error) {
       console.error("Email Sign-In Error:", error);
       Alert.alert("Sign In Failed", error.message);
     }
   };
 
-
-
-  // Google Sign-In Handling Code
   async function onGoogleButtonPress() {
     try {
-      // Check if your device supports Google Play Services
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-      // Trigger Google Sign-In
       const signInResult = await GoogleSignin.signIn();
-      // Retrieve the ID token
-      let idToken = signInResult.data?.idToken;
-      if (!idToken) {
-        idToken = signInResult.idToken; // Older versions of google-signin
-      }
-      if (!idToken) {
-        throw new Error("No ID token found");
-      }
-      // Log the ID token for debugging purposes (optional)
-      console.log("ID Token:", idToken);
-      // Create a Google credential with the token
-      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-      // Sign-in the user with the credential
-      const userCredential = await auth().signInWithCredential(googleCredential);
+      let idToken = signInResult.idToken || signInResult.data?.idToken;
+      if (!idToken) throw new Error("No ID token found");
 
-      // Retrieve the user's information
+      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+      const userCredential = await auth().signInWithCredential(googleCredential);
       const user = userCredential.user;
-      // Show an alert with user info
+
       alert(`Signed In User:\nUID: ${user.uid}\nName: ${user.displayName}\nEmail: ${user.email}`);
-      
-      navigation.replace('MainRouters')
+      navigation.replace('MainRouters');
       return userCredential;
     } catch (error) {
       console.error("Error during Google Sign-In:", error);
@@ -72,7 +51,7 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
+      <Text style={styles.title}>Welcome Back 👋</Text>
       
       <TextInput
         style={styles.input}
@@ -89,17 +68,28 @@ export default function LoginScreen({ navigation }) {
         onChangeText={setPassword}
         secureTextEntry
       />
-      <Button title="Sign In with Email" onPress={handleEmailSignIn} />
-      <Button title="Manager" onPress={handleSignInWithEmail} />
-      <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-        <Text style={styles.link}>Don't have an account? Sign Up</Text>
+
+      <TouchableOpacity style={styles.forgotPassword} onPress={() => navigation.navigate("ResetPassword")}>
+        <Text style={styles.forgotText}>Forgot Password?</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity style={styles.button} onPress={handleEmailSignIn}>
+        <Text style={styles.buttonText}>Sign In</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.linkButton} onPress={() => navigation.navigate("Register")}>
+        <Text style={styles.linkText}>Don't have an account? Sign Up</Text>
+      </TouchableOpacity>
+
       <View style={styles.separator} />
-      <Button
-        title="Google Sign-In"
-        onPress={onGoogleButtonPress}
-        color="#DB4437" 
-      />
+
+      <TouchableOpacity style={[styles.button, styles.googleButton]} onPress={onGoogleButtonPress}>
+        <Text style={styles.buttonText}>Sign In with Google</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.managerButton} onPress={handleSignInWithEmail}>
+        <Text style={styles.managerText}>Manager</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -108,28 +98,66 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 24,
+    backgroundColor: '#f7f7f7',
   },
   title: {
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: 'bold',
-    marginBottom: 32,
+    marginBottom: 36,
     textAlign: 'center',
+    color: '#333',
   },
   input: {
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 4,
-    padding: 12,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    padding: 14,
+    backgroundColor: '#fff',
   },
-  link: {
-    marginTop: 16,
-    color: 'blue',
-    textAlign: 'center',
+  forgotPassword: {
+    alignSelf: 'flex-end',
+    marginBottom: 20,
+  },
+  forgotText: {
+    color: '#007AFF',
+    fontSize: 14,
+  },
+  button: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 14,
+    borderRadius: 10,
     marginBottom: 16,
+    alignItems: 'center',
+  },
+  googleButton: {
+    backgroundColor: '#DB4437',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  linkButton: {
+    marginBottom: 12,
+    alignItems: 'center',
+  },
+  linkText: {
+    color: '#007AFF',
+    fontSize: 14,
   },
   separator: {
-    marginVertical: 20,
+    height: 1,
+    backgroundColor: '#ddd',
+    marginVertical: 24,
+  },
+  managerButton: {
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  managerText: {
+    color: '#555',
+    fontSize: 14,
   },
 });
