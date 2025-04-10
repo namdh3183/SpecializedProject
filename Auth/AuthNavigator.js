@@ -4,6 +4,7 @@ import LoginScreen from './LoginScreen';
 import RegisterScreen from './RegisterScreen';
 import ManagerMainRouter from '../ManagerRouters/ManagerMainRouter';
 import MainRouters from '../CustomerRouters/MainRouters';
+import ResetPassword from './ResetPassword';
 
 const Stack = createNativeStackNavigator();
 
@@ -20,6 +21,12 @@ export default function AuthNavigator() {
         component={RegisterScreen} 
         options={{ headerShown: false }} 
       />
+      <Stack.Screen 
+              name="ResetPassword" 
+              component={ResetPassword} 
+              options={{ headerShown: false }} 
+            />
+
       <Stack.Screen 
         name="ManagerMainRouter" 
         component={ManagerMainRouter} 

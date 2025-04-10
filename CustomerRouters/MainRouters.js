@@ -6,6 +6,7 @@ import HistoryScreen from "../CustomerScreens/HistoryScreen";
 import ProfileScreen from "../CustomerScreens/ProfileScreen";
 import PaymentScreen from "../CustomerScreens/PaymentScreen";
 import ReviewScreen from "../CustomerScreens/ReviewScreen";
+import EmptyScreen from "../CustomerScreens/EmptyScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -18,6 +19,8 @@ const MainRouters = () => {
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="Payment" component={PaymentScreen} />
       <Stack.Screen name="Review" component={ReviewScreen} />
+      <Stack.Screen name="EmptyScreen" component={EmptyScreen} />
+
     </Stack.Navigator>
   );
 };

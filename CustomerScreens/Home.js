@@ -1,87 +1,58 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Button } from "react-native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import Icon from "react-native-vector-icons/Ionicons";
 
-const Home = ({ navigation }) => {
-  
+// Import màn hình
+import EmptyScreen from "./EmptyScreen";
+import HistoryScreen from "./HistoryScreen";
+import ProfileScreen from "./ProfileScreen";
+import PaymentScreen from "./PaymentScreen";
+import ReviewScreen from "./ReviewScreen";
 
+const Tab = createBottomTabNavigator();
+
+const Home = () => {
   return (
-    <View style={styles.container}>
-      {/* Tiêu đề */}
-      <Text style={styles.title}>Quản lý sân cầu lông</Text>
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: true,
+        tabBarIcon: ({ color, size }) => {
+          let iconName;
 
-      {/* Danh sách các chức năng */}
-      <ScrollView contentContainerStyle={styles.menuContainer}>
-        <TouchableOpacity
-          style={[styles.menuItem, { backgroundColor: "#ed85be" }]} // Hồng nhạt
-          onPress={() => navigation.navigate("Booking")}
-        >
-          <Text style={styles.menuText}>Đặt sân</Text>
-        </TouchableOpacity>
+          switch (route.name) {
+            case "Trang chủ":
+              iconName = "home-outline";
+              break;
+            
+            case "Lịch sử":
+              iconName = "time-outline";
+              break;
+            case "Cá nhân":
+              iconName = "person-outline";
+              break;
+            case "Thanh toán":
+              iconName = "card-outline";
+              break;
+            case "Đánh giá":
+              iconName = "star-outline";
+              break;
+            default:
+              iconName = "ellipse-outline";
+          }
 
-        <TouchableOpacity
-          style={[styles.menuItem, { backgroundColor: "#e3c87f" }]} // Vàng nhạt
-          onPress={() => navigation.navigate("History")}
-        >
-          <Text style={styles.menuText}>Lịch sử đặt sân</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.menuItem, { backgroundColor: "#3f278f" }]} // Tím xanh
-          onPress={() => navigation.navigate("Profile")}
-        >
-          <Text style={styles.menuText}>Thông tin cá nhân</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.menuItem, { backgroundColor: "#ed85be" }]} // Hồng nhạt
-          onPress={() => navigation.navigate("Payment")}
-        >
-          <Text style={styles.menuText}>Thanh toán</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.menuItem, { backgroundColor: "#e3c87f" }]} // Vàng nhạt
-          onPress={() => navigation.navigate("Review")}
-        >
-          <Text style={styles.menuText}>Đánh giá</Text>
-        </TouchableOpacity>
-
-      </ScrollView>
-    </View>
+          return <Icon name={iconName} size={size} color={color} />;
+        },
+        tabBarActiveTintColor: "#3f278f",
+        tabBarInactiveTintColor: "gray",
+      })}
+    >
+      <Tab.Screen name="Trang chủ" component={EmptyScreen} />
+      <Tab.Screen name="Lịch sử" component={HistoryScreen} />
+      <Tab.Screen name="Cá nhân" component={ProfileScreen} />
+      <Tab.Screen name="Thanh toán" component={PaymentScreen} />
+      <Tab.Screen name="Đánh giá" component={ReviewScreen} />
+    </Tab.Navigator>
   );
-
-  
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#3f278f", // Tím xanh làm nền
-    alignItems: "center",
-    paddingTop: 50,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#ffffff", // Trắng
-    marginBottom: 20,
-  },
-  menuContainer: {
-    width: "90%",
-    alignItems: "center",
-  },
-  menuItem: {
-    width: "100%",
-    padding: 20,
-    borderRadius: 10,
-    marginVertical: 10,
-    alignItems: "center",
-  },
-  menuText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#ffffff", // Trắng
-  },
-});
 
 export default Home;

@@ -10,7 +10,6 @@ export default function LoginScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
 
-  // Configure Google Sign-In when the screen is loaded
   useEffect(() => {
     GoogleSignin.configure({
       webClientId: "525095539327-32qp8icaj3u4uu96c7441i1d1oov4fuv.apps.googleusercontent.com",
@@ -184,9 +183,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   title: {
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: 'bold',
-    marginBottom: 32,
+    marginBottom: 36,
     textAlign: 'center',
     color: '#3f278f',
   },
@@ -201,6 +200,23 @@ const styles = StyleSheet.create({
   passwordContainer: {
     flexDirection: 'row',
     marginBottom: 16,
+    alignItems: 'center',
+  },
+  googleButton: {
+    backgroundColor: '#DB4437',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  linkButton: {
+    marginBottom: 12,
+    alignItems: 'center',
+  },
+  linkText: {
+    color: '#007AFF',
+    fontSize: 14,
   },
   link: {
     color: '#3f278f',
