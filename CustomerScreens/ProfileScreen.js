@@ -1,40 +1,101 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Alert } from "react-native";
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
+import { launchImageLibrary } from 'react-native-image-picker';
 
 const ProfileScreen = ({ navigation }) => {
-  const [name, setName] = useState("Nguyễn Văn A");
-  const [email, setEmail] = useState("nguyenvana@example.com");
-  const [phone, setPhone] = useState("0123456789");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [avatar, setAvatar] = useState("https://i.pravatar.cc/150");
 
-  const handleSave = () => {
-    alert("Thông tin đã được cập nhật!");
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      const userId = auth().currentUser.uid;
+      const userProfile = await firestore().collection('profiles').doc(userId).get();
+
+      if (userProfile.exists) {
+        const data = userProfile.data();
+        setName(data.name);
+        setEmail(auth().currentUser.email); // Get email from Firebase Auth
+        setPhone(data.phone);
+        setAvatar(data.avatar);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+
+  const handleChangeAvatar = () => {
+    launchImageLibrary({ mediaType: 'photo', quality: 0.5 }, (response) => {
+      if (response.didCancel) {
+        console.log("User cancelled image picker");
+      } else if (response.errorCode) {
+        console.log("ImagePicker Error: ", response.errorMessage);
+      } else {
+        const source = { uri: response.assets[0].uri };
+        setAvatar(source.uri);
+        uploadAvatarToFirestore(source.uri);
+      }
+    });
+  };
+
+  const uploadAvatarToFirestore = async (uri) => {
+    const userId = auth().currentUser.uid;
+    try {
+      await firestore().collection('profiles').doc(userId).update({
+        avatar: uri,
+      });
+      Alert.alert("Success", "Avatar updated successfully!");
+    } catch (error) {
+      console.error("Error updating avatar: ", error);
+      Alert.alert("Error", "Failed to update avatar.");
+    }
+  };
+
+  const handleSave = async () => {
+    const userId = auth().currentUser.uid;
+
+    try {
+      await firestore().collection('profiles').doc(userId).set({
+        name,
+        email,
+        phone,
+        avatar,
+      });
+
+      Alert.alert("Success", "Profile updated successfully!");
+    } catch (error) {
+      console.error("Error updating profile: ", error);
+      Alert.alert("Error", "Failed to update profile.");
+    }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Hồ sơ cá nhân</Text>
+      <Text style={styles.title}>Profile</Text>
 
-      {/* Ảnh đại diện */}
-      <Image source={{ uri: "https://i.pravatar.cc/150" }} style={styles.avatar} />
+      <TouchableOpacity onPress={handleChangeAvatar}>
+        <Image source={{ uri: avatar }} style={styles.avatar} />
+      </TouchableOpacity>
 
-      {/* Ô nhập thông tin */}
-      <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="Họ và tên" />
-      <TextInput style={styles.input} value={email} onChangeText={setEmail} keyboardType="email-address" placeholder="Email" />
-      <TextInput style={styles.input} value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="Số điện thoại" />
+      <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="Full Name" />
 
-      {/* Nút lưu thay đổi */}
+      <TextInput style={styles.input} value={email} editable={false} placeholder="Email" />
+
+      <TextInput style={styles.input} value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="Phone Number" />
+
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-        <Text style={styles.buttonText}>Lưu thay đổi</Text>
+        <Text style={styles.buttonText}>Save Changes</Text>
       </TouchableOpacity>
 
-      {/* Nút đăng xuất */}
-      <TouchableOpacity style={styles.logoutButton} onPress={() => navigation.replace("LoginScreen")}>
-        <Text style={styles.buttonText}>Đăng xuất</Text>
+      <TouchableOpacity style={styles.logoutButton} onPress={() => navigation.replace("Login")}>
+        <Text style={styles.buttonText}>Logout</Text>
       </TouchableOpacity>
 
-      {/* Nút trở về */}
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Text style={styles.buttonText}>Trở về</Text>
+        <Text style={styles.buttonText}>Go Back</Text>
       </TouchableOpacity>
     </View>
   );
