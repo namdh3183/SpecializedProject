@@ -76,7 +76,7 @@ export default function LoginScreen({ navigation }) {
         navigation.replace('MainRouters');
       }
 
-      Alert.alert('Signed In', `Welcome back, ${user.email}!`);
+      // Alert.alert('Signed In', `Welcome back, ${user.email}!`);
     } catch (error) {
       console.error('Email Sign-In Error:', error);
       Alert.alert('Sign In Failed', error.message);

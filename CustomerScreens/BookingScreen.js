@@ -1,127 +1,186 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, TextInput, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  StyleSheet,
+  Platform,
+} from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import firestore from "@react-native-firebase/firestore";
 
-const BookingScreen = ({ navigation }) => {
-  const [date, setDate] = useState(new Date());
+const BookingScreen = ({ route, navigation }) => {
+  const { court } = route.params;
+  const [bookingDate, setBookingDate] = useState(new Date());
+  const [startTime, setStartTime] = useState(null);
+  const [endTime, setEndTime] = useState(null);
+
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [time, setTime] = useState(new Date());
-  const [showTimePicker, setShowTimePicker] = useState(false);
-  const [court, setCourt] = useState("");
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
+
+  const handleBooking = async () => {
+    // Kiểm tra các điều kiện đầu vào
+    if (!bookingDate || !startTime || !endTime) {
+      Alert.alert("Lỗi", "Vui lòng chọn ngày và giờ bắt đầu/kết thúc.");
+      return;
+    }
+
+    if (startTime >= endTime) {
+      Alert.alert("Lỗi", "Giờ bắt đầu phải nhỏ hơn giờ kết thúc.");
+      return;
+    }
+
+    try {
+      await firestore().collection("bookings").add({
+        courtId: court.name,
+        date: bookingDate.toDateString(),
+        startTime: startTime.toLocaleTimeString(),
+        endTime: endTime.toLocaleTimeString(),
+        timestamp: firestore.FieldValue.serverTimestamp(),
+        status: "pending", // Có thể dùng để xác nhận sau
+      });
+
+      Alert.alert("Thành công", "Bạn đã đặt sân thành công!");
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể đặt sân. Vui lòng thử lại.");
+      console.error("Booking error:", error);
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Đặt sân cầu lông</Text>
+      <Text style={styles.title}>Đặt sân: {court.name}</Text>
 
-      <ScrollView contentContainerStyle={styles.formContainer}>
-        {/* Chọn ngày */}
-        <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
-          <Text style={styles.inputText}>Ngày: {date.toLocaleDateString()}</Text>
-        </TouchableOpacity>
-        {showDatePicker && (
-          <DateTimePicker
-            value={date}
-            mode="date"
-            display="default"
-            onChange={(event, selectedDate) => {
-              setShowDatePicker(false);
-              if (selectedDate) setDate(selectedDate);
-            }}
-          />
-        )}
-
-        {/* Chọn giờ */}
-        <TouchableOpacity style={styles.input} onPress={() => setShowTimePicker(true)}>
-          <Text style={styles.inputText}>Giờ: {time.toLocaleTimeString()}</Text>
-        </TouchableOpacity>
-        {showTimePicker && (
-          <DateTimePicker
-            value={time}
-            mode="time"
-            display="default"
-            onChange={(event, selectedTime) => {
-              setShowTimePicker(false);
-              if (selectedTime) setTime(selectedTime);
-            }}
-          />
-        )}
-
-        {/* Chọn sân */}
-        <TextInput
-          style={styles.textInput}
-          placeholder="Nhập số sân"
-          placeholderTextColor="#ddd"
-          keyboardType="numeric"
-          value={court}
-          onChangeText={setCourt}
+      <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.inputBox}>
+        <Text style={styles.inputText}>
+          📅 Ngày: {bookingDate.toDateString()}
+        </Text>
+      </TouchableOpacity>
+      {showDatePicker && (
+        <DateTimePicker
+          mode="date"
+          display="default"
+          value={bookingDate}
+          onChange={(e, selectedDate) => {
+            setShowDatePicker(Platform.OS === "ios");
+            if (selectedDate) setBookingDate(selectedDate);
+          }}
         />
+      )}
 
-        {/* Nút đặt sân */}
-        <TouchableOpacity style={styles.button} onPress={() => alert("Đặt sân thành công!")}>
-          <Text style={styles.buttonText}>Xác nhận đặt sân</Text>
-        </TouchableOpacity>
+      <TouchableOpacity onPress={() => setShowStartPicker(true)} style={styles.inputBox}>
+        <Text style={styles.inputText}>
+          ⏰ Giờ bắt đầu: {startTime ? startTime.toLocaleTimeString() : "Chọn giờ"}
+        </Text>
+      </TouchableOpacity>
+      {showStartPicker && (
+        <DateTimePicker
+          mode="time"
+          display="default"
+          value={new Date()}
+          onChange={(e, selectedTime) => {
+            setShowStartPicker(Platform.OS === "ios");
+            if (selectedTime) setStartTime(selectedTime);
+          }}
+        />
+      )}
 
-         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                <Text style={styles.backText}>Trở về</Text>
-          </TouchableOpacity>
-      </ScrollView>
+      <TouchableOpacity onPress={() => setShowEndPicker(true)} style={styles.inputBox}>
+        <Text style={styles.inputText}>
+          ⏳ Giờ kết thúc: {endTime ? endTime.toLocaleTimeString() : "Chọn giờ"}
+        </Text>
+      </TouchableOpacity>
+      {showEndPicker && (
+        <DateTimePicker
+          mode="time"
+          display="default"
+          value={new Date()}
+          onChange={(e, selectedTime) => {
+            setShowEndPicker(Platform.OS === "ios");
+            if (selectedTime) setEndTime(selectedTime);
+          }}
+        />
+      )}
+
+      <TouchableOpacity style={styles.bookButton} onPress={handleBooking}>
+        <Text style={styles.bookText}>Xác nhận đặt sân</Text>
+      </TouchableOpacity>
+
+         {/* Nút Quay lại dưới */}
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButtonBottom}>
+              <Text style={styles.backIcon}>←</Text>
+              <Text style={styles.backText}>Quay lại</Text>
+            </TouchableOpacity>
     </View>
   );
-  
 };
+
+export default BookingScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#3f278f", // Màu tím xanh
-    alignItems: "center",
-    paddingTop: 50,
+    padding: 20,
+    backgroundColor: "#fff",
   },
   title: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: "bold",
-    color: "#ffffff",
-    marginBottom: 20,
+    color: "#222",
+    marginBottom: 24,
+    textAlign: "center",
   },
-  formContainer: {
-    width: "90%",
-    alignItems: "center",
-  },
-  input: {
-    width: "100%",
-    padding: 15,
-    backgroundColor: "#ed85be", // Hồng nhạt
+  inputBox: {
+    backgroundColor: "#f9f9f9",
+    padding: 16,
     borderRadius: 10,
-    marginVertical: 10,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#ddd",
   },
   inputText: {
-    fontSize: 18,
-    color: "#ffffff",
-    textAlign: "center",
+    fontSize: 16,
+    color: "#333",
   },
-  textInput: {
-    width: "100%",
-    padding: 15,
-    backgroundColor: "#e3c87f", // Vàng nhạt
+  bookButton: {
+    backgroundColor: "#28a745",
+    paddingVertical: 14,
     borderRadius: 10,
-    marginVertical: 10,
-    color: "#000",
-    fontSize: 18,
-    textAlign: "center",
-  },
-  button: {
-    width: "100%",
-    padding: 15,
-    backgroundColor: "#3f278f", // Tím xanh
-    borderRadius: 10,
-    marginVertical: 20,
     alignItems: "center",
+    marginTop: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  buttonText: {
-    fontSize: 20,
+  bookText: {
+    color: "#fff",
+    fontSize: 16,
     fontWeight: "bold",
-    color: "#ffffff",
+  },
+  backButtonBottom: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 24,
+    paddingVertical: 12,
+    borderRadius: 10,
+    backgroundColor: "#eee",
+  },
+  backIcon: {
+    fontSize: 18,
+    marginRight: 6,
+    color: "#007AFF",
+  },
+  backText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#007AFF",
   },
 });
 
-export default BookingScreen;
