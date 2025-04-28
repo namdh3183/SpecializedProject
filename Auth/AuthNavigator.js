@@ -21,12 +21,11 @@ export default function AuthNavigator() {
         component={RegisterScreen} 
         options={{ headerShown: false }} 
       />
-      <Stack.Screen 
-              name="ResetPassword" 
-              component={ResetPassword} 
-              options={{ headerShown: false }} 
-            />
-
+      <Stack.Screen
+        name="ResetPassword"
+        component={ResetPassword}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen 
         name="ManagerMainRouter" 
         component={ManagerMainRouter} 
