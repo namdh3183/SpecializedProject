@@ -41,6 +41,8 @@ const EmptyScreen = ({ navigation }) => {
             name: data.courtId || "Tên sân",
             location: data.Location,
             image: data.Avatar,
+            description: data.Description
+
           };
         });
 
@@ -49,6 +51,7 @@ const EmptyScreen = ({ navigation }) => {
           return {
             name: data.courtId,
             image: data.Avatar,
+            description: data.Description
           };
         });
 

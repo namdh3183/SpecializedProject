@@ -1,33 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, FlatList, StyleSheet } from "react-native";
+import firestore from "@react-native-firebase/firestore";
 
 const HistoryScreen = ({ navigation }) => {
-  const [history, setHistory] = useState([
-    { id: "1", court: "Sân 1", date: "2025-03-06", time: "18:00 - 19:00", status: "Đã hoàn thành" },
-    { id: "2", court: "Sân 2", date: "2025-03-07", time: "19:00 - 20:00", status: "Đang chờ" },
-    { id: "3", court: "Sân 3", date: "2025-03-08", time: "20:00 - 21:00", status: "Đã hủy" },
-  ]);
+  const [history, setHistory] = useState([]);
 
-  const handleCancel = (id) => {
-    setHistory((prevHistory) =>
-      prevHistory.map((item) =>
-        item.id === id && item.status === "Đang chờ"
-          ? { ...item, status: "Đã hủy" }
-          : item
-      )
-    );
-  };
+  useEffect(() => {
+    const fetchHistory = async () => {
+      const snapshot = await firestore().collection("bookings").get();
+      const bookings = snapshot.docs.map(doc => ({
+        id: doc.id,
+        court: doc.data().courtId,
+        date: doc.data().date,
+        startTime: doc.data().startTime,
+        endTime: doc.data().endTime,
+        status: doc.data().status,
+      }));
+      setHistory(bookings);
+    };
+
+    fetchHistory();
+  }, []);
 
   const renderItem = ({ item }) => (
     <View style={styles.item}>
       <Text style={styles.courtName}>{item.court}</Text>
-      <Text style={styles.detail}>📅 {item.date} | 🕒 {item.time}</Text>
+      <Text style={styles.detail}>📅 {item.date} | 🕒 {item.startTime} - {item.endTime}</Text>
       <Text style={[styles.status, getStatusStyle(item.status)]}>{item.status}</Text>
-      {item.status === "Đang chờ" && (
-        <TouchableOpacity style={styles.cancelButton} onPress={() => handleCancel(item.id)}>
-          <Text style={styles.cancelText}>Hủy</Text>
-        </TouchableOpacity>
-      )}
     </View>
   );
 
@@ -49,10 +48,8 @@ const HistoryScreen = ({ navigation }) => {
 
 const getStatusStyle = (status) => {
   switch (status) {
-    case "Đã hoàn thành":
+    case "completed":
       return { color: "#3f278f" };
-    case "Đang chờ":
-      return { color: "#e3c87f" };
     case "Đã hủy":
       return { color: "#ed85be" };
     default:
@@ -97,18 +94,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 5,
-  },
-  cancelButton: {
-    marginTop: 10,
-    backgroundColor: "#ed85be",
-    paddingVertical: 5,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-  },
-  cancelText: {
-    color: "#ffffff",
-    fontSize: 16,
-    fontWeight: "bold",
   },
   backButton: {
     marginTop: 20,

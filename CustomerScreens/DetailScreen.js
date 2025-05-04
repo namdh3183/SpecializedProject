@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,49 +6,131 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  TextInput,
 } from "react-native";
+import firestore from "@react-native-firebase/firestore";
+import auth from "@react-native-firebase/auth";
 import { useNavigation } from "@react-navigation/native";
+
+const StarRating = ({ rating, onRate }) => {
+  return (
+    <View style={{ flexDirection: "row", marginVertical: 10 }}>
+      {[1, 2, 3, 4, 5].map((star) => (
+        <TouchableOpacity key={star} onPress={() => onRate(star)}>
+          <Text style={{ fontSize: 30, color: star <= rating ? "#FFD700" : "#ccc" }}>
+            ★
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+};
 
 const DetailScreen = ({ route }) => {
   const { court } = route.params;
   const navigation = useNavigation();
 
+  const [ratingValue, setRatingValue] = useState(0);
+  const [comment, setComment] = useState("");
+  const [ratingsList, setRatingsList] = useState([]);
+
+  const fetchRatings = async () => {
+    try {
+      const snapshot = await firestore()
+        .collection("ratings")
+        .where("courtId", "==", court.name)
+        .orderBy("createdAt", "desc")
+        .get();
+
+      const data = snapshot.docs.map((doc) => doc.data());
+      setRatingsList(data);
+    } catch (error) {
+      console.warn("Lỗi lấy đánh giá:", error);
+    }
+  };
+
+  const submitRating = async () => {
+    const user = auth().currentUser;
+    if (!user) return alert("Bạn cần đăng nhập để đánh giá.");
+
+    if (!comment.trim()) return alert("Vui lòng nhập bình luận.");
+    if (ratingValue === 0) return alert("Vui lòng chọn số sao.");
+
+    try {
+      await firestore().collection("ratings").add({
+        courtId: court.name,
+        userId: user.uid,
+        rating: ratingValue,
+        comment: comment,
+        createdAt: firestore.FieldValue.serverTimestamp(),
+      });
+
+      setRatingValue(0);
+      setComment("");
+      fetchRatings();
+    } catch (error) {
+      console.warn("Gửi đánh giá thất bại:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchRatings();
+  }, []);
+
   return (
     <ScrollView style={styles.container}>
-      {/* Ảnh */}
       <Image source={{ uri: court.image }} style={styles.image} />
-
-      {/* Tên sân */}
       <Text style={styles.title}>{court.name}</Text>
-
-      {/* Địa điểm */}
       <Text style={styles.location}>📍 {court.location || "Không rõ vị trí"}</Text>
 
-      {/* Trạng thái */}
-      <Text style={styles.status}>
-        🟢 Trạng thái:{" "}
-        <Text style={{ fontWeight: "bold", color: court.status === "available" ? "green" : "red" }}>
-          {court.status === "available" ? "Còn trống" : "Đã đặt"}
-        </Text>
-      </Text>
-
-      {/* Mô tả */}
       <View style={styles.descriptionBox}>
         <Text style={styles.sectionTitle}>📝 Mô tả chi tiết:</Text>
         <Text style={styles.descriptionText}>
-          {court.Description || "Không có mô tả cho sân này."}
+          {court.description || "Không có mô tả cho sân này."}
         </Text>
       </View>
 
-      {/* Nút Đặt sân */}
+      {/* Đánh giá */}
+      <View style={{ marginTop: 20 }}>
+        <Text style={styles.sectionTitle}>⭐ Đánh giá sân</Text>
+
+        <StarRating rating={ratingValue} onRate={setRatingValue} />
+
+        <TextInput
+          placeholder="Viết bình luận..."
+          value={comment}
+          onChangeText={setComment}
+          style={styles.commentBox}
+        />
+
+        <TouchableOpacity style={styles.bookButton} onPress={submitRating}>
+          <Text style={styles.bookText}>Gửi đánh giá</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={{ marginTop: 20 }}>
+        <Text style={styles.sectionTitle}>📋 Các đánh giá:</Text>
+        {ratingsList.length === 0 ? (
+          <Text>Chưa có đánh giá nào.</Text>
+        ) : (
+          ratingsList.map((r, idx) => (
+            <View key={idx} style={styles.ratingItem}>
+              <Text style={{ fontSize: 16, color: "#FFD700" }}>
+                {"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}
+              </Text>
+              <Text>{r.comment}</Text>
+            </View>
+          ))
+        )}
+      </View>
+
       <TouchableOpacity
-        style={styles.bookButton}
+        style={[styles.bookButton, { marginTop: 30 }]}
         onPress={() => navigation.navigate("Booking", { court })}
       >
         <Text style={styles.bookText}>Đặt sân ngay</Text>
       </TouchableOpacity>
 
-      {/* Nút Quay lại dưới */}
       <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButtonBottom}>
         <Text style={styles.backIcon}>←</Text>
         <Text style={styles.backText}>Quay lại</Text>
@@ -79,10 +161,6 @@ const styles = StyleSheet.create({
     color: "#555",
     marginBottom: 8,
   },
-  status: {
-    fontSize: 16,
-    marginBottom: 12,
-  },
   descriptionBox: {
     backgroundColor: "#f2f2f2",
     borderRadius: 8,
@@ -100,6 +178,13 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     color: "#444",
   },
+  commentBox: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    marginTop: 10,
+    padding: 8,
+  },
   bookButton: {
     marginTop: 20,
     backgroundColor: "#28a745",
@@ -111,6 +196,12 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  ratingItem: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: "#f5f5f5",
+    borderRadius: 8,
   },
   backButtonBottom: {
     flexDirection: "row",
