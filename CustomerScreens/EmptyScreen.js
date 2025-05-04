@@ -26,7 +26,6 @@ const EmptyScreen = ({ navigation }) => {
         const highlightSnapshot = await firestore()
           .collection("courts")
           .where("status", "==", "available")
-          .limit(4)
           .get();
 
         const popularSnapshot = await firestore()
@@ -39,11 +38,10 @@ const EmptyScreen = ({ navigation }) => {
           const data = doc.data();
           return {
             id: doc.id,
-            name: data.courtId || "Tên sân",
+            name: data.courtId || "Court Name",
             location: data.Location,
             image: data.Avatar,
             description: data.Description
-
           };
         });
 
@@ -59,9 +57,9 @@ const EmptyScreen = ({ navigation }) => {
 
         setHighlightCourts(highlightData);
         setPopularCourts(popularData);
-        setFilteredCourts(highlightData);  // Set initial courts to be shown
+        setFilteredCourts(highlightData);
       } catch (error) {
-        console.error("Lỗi khi fetch dữ liệu sân:", error);
+        console.error("Error fetching courts:", error);
       }
     };
 
@@ -71,7 +69,6 @@ const EmptyScreen = ({ navigation }) => {
   const handleSearch = (query) => {
     setSearchQuery(query);
 
-    // Nếu không có gì nhập vào, hiển thị tất cả sân
     if (!query) {
       setFilteredCourts(highlightCourts);
       return;
@@ -96,7 +93,7 @@ const EmptyScreen = ({ navigation }) => {
       {/* Search Bar */}
       <View style={styles.searchBox}>
         <TextInput
-          placeholder="Tìm kiếm theo tên sân..."
+          placeholder="Search by court name..."
           placeholderTextColor="#999"
           style={styles.searchInput}
           value={searchQuery}
@@ -106,7 +103,7 @@ const EmptyScreen = ({ navigation }) => {
 
       {/* Highlight Courts */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Sân nổi bật</Text>
+        <Text style={styles.sectionTitle}>Featured Courts</Text>
         {filteredCourts.map((court, index) => (
           <TouchableOpacity
             key={index}
@@ -116,7 +113,7 @@ const EmptyScreen = ({ navigation }) => {
               <Image source={{ uri: court.image }} style={styles.highlightImage} />
               <View style={styles.highlightLabel}>
                 <Text style={styles.highlightTag}>BOOK NOW</Text>
-                <Text style={styles.highlightTitle}>Sân : {court.name}</Text>
+                <Text style={styles.highlightTitle}>Court: {court.name}</Text>
                 <Text style={styles.highlightDesc}>{court.location}</Text>
               </View>
             </View>
@@ -126,7 +123,7 @@ const EmptyScreen = ({ navigation }) => {
 
       {/* Popular Courts */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Sân phổ biến</Text>
+        <Text style={styles.sectionTitle}>Popular Courts</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {popularCourts.map((item, index) => (
             <TouchableOpacity key={index} style={styles.cityCard}>

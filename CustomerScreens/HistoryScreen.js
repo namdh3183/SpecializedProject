@@ -32,7 +32,7 @@ const HistoryScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Lịch sử đặt sân</Text>
+      <Text style={styles.title}>Booking History</Text>
       <FlatList
         data={history}
         keyExtractor={(item) => item.id}
@@ -40,7 +40,7 @@ const HistoryScreen = ({ navigation }) => {
         contentContainerStyle={styles.list}
       />
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Text style={styles.backText}>Trở về</Text>
+        <Text style={styles.backText}>Go Back</Text>
       </TouchableOpacity>
     </View>
   );
@@ -50,7 +50,7 @@ const getStatusStyle = (status) => {
   switch (status) {
     case "completed":
       return { color: "#3f278f" };
-    case "Đã hủy":
+    case "cancelled":
       return { color: "#ed85be" };
     default:
       return { color: "#ffffff" };
