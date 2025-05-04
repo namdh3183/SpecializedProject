@@ -38,6 +38,7 @@ const EmptyScreen = ({ navigation }) => {
         const highlightData = highlightSnapshot.docs.map((doc) => {
           const data = doc.data();
           return {
+            id: doc.id,
             name: data.courtId || "Tên sân",
             location: data.Location,
             image: data.Avatar,
@@ -49,6 +50,7 @@ const EmptyScreen = ({ navigation }) => {
         const popularData = popularSnapshot.docs.map((doc) => {
           const data = doc.data();
           return {
+            id: doc.id,
             name: data.courtId,
             image: data.Avatar,
             description: data.Description

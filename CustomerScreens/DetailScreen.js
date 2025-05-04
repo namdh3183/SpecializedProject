@@ -38,16 +38,21 @@ const DetailScreen = ({ route }) => {
     try {
       const snapshot = await firestore()
         .collection("ratings")
-        .where("courtId", "==", court.name)
+      //  .where("courtId", "==", court.id)
         .orderBy("createdAt", "desc")
         .get();
-
+  
       const data = snapshot.docs.map((doc) => doc.data());
       setRatingsList(data);
     } catch (error) {
       console.warn("Lỗi lấy đánh giá:", error);
     }
   };
+  
+
+  useEffect(() => {
+    fetchRatings();
+  }, []); 
 
   const submitRating = async () => {
     const user = auth().currentUser;
@@ -58,7 +63,7 @@ const DetailScreen = ({ route }) => {
 
     try {
       await firestore().collection("ratings").add({
-        courtId: court.name,
+        courtId: court.id,
         userId: user.uid,
         rating: ratingValue,
         comment: comment,
@@ -67,15 +72,11 @@ const DetailScreen = ({ route }) => {
 
       setRatingValue(0);
       setComment("");
-      fetchRatings();
+      fetchRatings(); // Fetch ratings again after submitting a new one
     } catch (error) {
       console.warn("Gửi đánh giá thất bại:", error);
     }
   };
-
-  useEffect(() => {
-    fetchRatings();
-  }, []);
 
   return (
     <ScrollView style={styles.container}>
@@ -107,22 +108,22 @@ const DetailScreen = ({ route }) => {
           <Text style={styles.bookText}>Gửi đánh giá</Text>
         </TouchableOpacity>
       </View>
-
       <View style={{ marginTop: 20 }}>
-        <Text style={styles.sectionTitle}>📋 Các đánh giá:</Text>
-        {ratingsList.length === 0 ? (
-          <Text>Chưa có đánh giá nào.</Text>
-        ) : (
-          ratingsList.map((r, idx) => (
-            <View key={idx} style={styles.ratingItem}>
-              <Text style={{ fontSize: 16, color: "#FFD700" }}>
-                {"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}
-              </Text>
-              <Text>{r.comment}</Text>
-            </View>
-          ))
-        )}
-      </View>
+      <Text style={styles.sectionTitle}>📋 Các đánh giá:</Text>
+      {ratingsList.length === 0 ? (
+        <Text>Chưa có đánh giá nào cho sân này.</Text>
+      ) : (
+        ratingsList.map((r, idx) => (
+          <View key={idx} style={styles.ratingItem}>
+            <Text style={{ fontSize: 16, color: "#FFD700" }}>
+              {"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}
+            </Text>
+            <Text>{r.comment}</Text>
+          </View>
+        ))
+      )}
+    </View>
+
 
       <TouchableOpacity
         style={[styles.bookButton, { marginTop: 30 }]}
