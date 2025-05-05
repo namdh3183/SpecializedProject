@@ -49,7 +49,6 @@ const Home = () => {
       <Tab.Screen name="Home" component={EmptyScreen} />
       <Tab.Screen name="History" component={HistoryScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
-      <Tab.Screen name="Review" component={ReviewScreen} />
     </Tab.Navigator>
   );
 };

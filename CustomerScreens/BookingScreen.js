@@ -46,18 +46,20 @@ const BookingScreen = ({ route, navigation }) => {
 
   const handleBooking = async () => {
     if (!startTime || !endTime) {
-      Alert.alert("Lỗi", "Vui lòng chọn giờ bắt đầu và kết thúc.");
+      Alert.alert("Error", "Please select both start and end time.");
       return;
     }
+
     const startHour = startTime.getHours();
     const endHour = endTime.getHours();
+
     for (let i = startHour; i < endHour; i++) {
       if (reservedHours.includes(i)) {
-        Alert.alert("Lỗi", "Có giờ đã bị đặt. Chọn giờ khác.");
+        Alert.alert("Error", "Some hours are already booked. Please choose another time.");
         return;
       }
     }
-  
+
     try {
       await firestore().collection("bookings").add({
         courtId: court.name,
@@ -65,27 +67,34 @@ const BookingScreen = ({ route, navigation }) => {
         startTime: `${startHour}:00`,
         endTime: `${endHour}:00`,
         timestamp: firestore.FieldValue.serverTimestamp(),
-        status: "pending",  // Trạng thái đặt là "pending" trước khi thanh toán
+        status: "pending", // Status is pending before payment
       });
-  
+
       const newReserved = [];
       for (let i = startHour; i < endHour; i++) {
         newReserved.push(i);
       }
+
       setReservedHours((prev) => [...prev, ...newReserved]);
       setStartTime(null);
       setEndTime(null);
-      Alert.alert("Vui lòng thanh toán nhé.");
-  
+
+      Alert.alert("Please proceed to payment.");
+
       const price = calculatePrice();
-      navigation.navigate("Paypal", { courtName: court.name, date: bookingDate.toDateString(), startTime: `${startHour}:00`, endTime: `${endHour}:00`, price });  
+      navigation.navigate("Paypal", {
+        courtName: court.name,
+        date: bookingDate.toDateString(),
+        startTime: `${startHour}:00`,
+        endTime: `${endHour}:00`,
+        price,
+      });
     } catch (error) {
-      console.error("Lỗi đặt sân:", error);
-      Alert.alert("Lỗi", "Không thể đặt sân.");
+      console.error("Booking error:", error);
+      Alert.alert("Error", "Could not complete the booking.");
     }
   };
-  
-  
+
   const renderHourPicker = (setTime, type) => {
     const hours = Array.from({ length: 24 }, (_, i) => i);
     const now = new Date();
@@ -103,7 +112,7 @@ const BookingScreen = ({ route, navigation }) => {
             isToday &&
             (hour < currentHour || (hour === currentHour && currentMinute > 0));
 
-          const disabled = isPast || reservedHours.includes(hour); // Khóa giờ đã đặt
+          const disabled = isPast || reservedHours.includes(hour);
 
           return (
             <TouchableOpacity
@@ -112,9 +121,7 @@ const BookingScreen = ({ route, navigation }) => {
               onPress={() => setTime(hourDate)}
               disabled={disabled}
             >
-              <Text
-                style={[styles.hourText, disabled && styles.disabledHourText]}
-              >
+              <Text style={[styles.hourText, disabled && styles.disabledHourText]}>
                 {hour}:00
               </Text>
             </TouchableOpacity>
@@ -127,21 +134,19 @@ const BookingScreen = ({ route, navigation }) => {
   const calculatePrice = () => {
     if (!startTime || !endTime) return 0;
     const hours = endTime.getHours() - startTime.getHours();
-    const isSunday = bookingDate.getDay() === 0; // Kiểm tra ngày Chủ Nhật
-    return hours * (isSunday ? 65000 : 60000); // Nếu Chủ Nhật, giá sẽ là 65000 VND
+    const isSunday = bookingDate.getDay() === 0;
+    return hours * (isSunday ? 65000 : 60000);
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Đặt sân: {court.name}</Text>
+      <Text style={styles.title}>Book Court: {court.name}</Text>
 
       <TouchableOpacity
         onPress={() => setShowDatePicker(true)}
         style={styles.inputBox}
       >
-        <Text style={styles.inputText}>
-          📅 Ngày: {bookingDate.toDateString()}
-        </Text>
+        <Text style={styles.inputText}>📅 Date: {bookingDate.toDateString()}</Text>
       </TouchableOpacity>
       {showDatePicker && (
         <DateTimePicker
@@ -161,7 +166,7 @@ const BookingScreen = ({ route, navigation }) => {
         style={styles.inputBox}
       >
         <Text style={styles.inputText}>
-          ⏰ Giờ bắt đầu: {startTime ? startTime.toLocaleTimeString() : "Chọn giờ"}
+          ⏰ Start Time: {startTime ? startTime.toLocaleTimeString() : "Select time"}
         </Text>
       </TouchableOpacity>
       {showStartPicker && renderHourPicker(setStartTime, "start")}
@@ -171,17 +176,17 @@ const BookingScreen = ({ route, navigation }) => {
         style={styles.inputBox}
       >
         <Text style={styles.inputText}>
-          ⏳ Giờ kết thúc: {endTime ? endTime.toLocaleTimeString() : "Chọn giờ"}
+          ⏳ End Time: {endTime ? endTime.toLocaleTimeString() : "Select time"}
         </Text>
       </TouchableOpacity>
       {showEndPicker && renderHourPicker(setEndTime, "end")}
 
       <Text style={{ fontSize: 16, marginTop: 10 }}>
-        Tổng tiền: {calculatePrice().toLocaleString()}đ
+        Total: {calculatePrice().toLocaleString()}đ
       </Text>
 
       <TouchableOpacity style={styles.bookButton} onPress={handleBooking}>
-        <Text style={styles.bookText}>Xác nhận đặt sân</Text>
+        <Text style={styles.bookText}>Confirm Booking</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -189,7 +194,7 @@ const BookingScreen = ({ route, navigation }) => {
         style={styles.backButtonBottom}
       >
         <Text style={styles.backIcon}>←</Text>
-        <Text style={styles.backText}>Quay lại</Text>
+        <Text style={styles.backText}>Back</Text>
       </TouchableOpacity>
     </View>
   );

@@ -18,22 +18,22 @@ const ThankyouScreen = ({ route, navigation }) => {
         source={{ uri: 'https://cdn-icons-png.flaticon.com/512/845/845646.png' }}
         style={styles.successIcon}
       />
-      <Text style={styles.title}>Thanh toán thành công!</Text>
+      <Text style={styles.title}>Payment Success!</Text>
 
       <View style={styles.detailBox}>
-        <Text style={styles.label}>Sân:</Text>
+        <Text style={styles.label}>Court:</Text>
         <Text style={styles.value}>{courtName}</Text>
 
-        <Text style={styles.label}>Ngày:</Text>
+        <Text style={styles.label}>Date:</Text>
         <Text style={styles.value}>{date}</Text>
 
-        <Text style={styles.label}>Thời gian:</Text>
+        <Text style={styles.label}>Time:</Text>
         <Text style={styles.value}>{startTime} - {endTime}</Text>
 
-        <Text style={styles.label}>Số tiền:</Text>
+        <Text style={styles.label}>Money :</Text>
         <Text style={styles.value}>{amount?.toLocaleString()} VND</Text>
 
-        <Text style={styles.label}>Email người thanh toán:</Text>
+        <Text style={styles.label}>Email Payment:</Text>
         <Text style={styles.value}>{payerEmail || 'Không có'}</Text>
       </View>
 
@@ -41,7 +41,7 @@ const ThankyouScreen = ({ route, navigation }) => {
         style={styles.button}
         onPress={() => navigation.navigate('Home')}
       >
-        <Text style={styles.buttonText}>Quay về trang chủ</Text>
+        <Text style={styles.buttonText}>Back Home</Text>
       </TouchableOpacity>
     </View>
   );
