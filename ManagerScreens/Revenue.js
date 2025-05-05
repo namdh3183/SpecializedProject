@@ -130,9 +130,9 @@ const RevenueScreen = () => {
             <Text style={styles.orderCell}>
               {new Date(order.endTime).toLocaleDateString()}
             </Text>
-            <Text style={styles.orderCell}>
+            {/* <Text style={styles.orderCell}>
               {truncateText(order.id)}
-            </Text>
+            </Text> */}
             {/* Display the order's price using formatPrice */}
             <Text style={styles.orderCell}>
               {formatPrice(order.totalPrice)} VND

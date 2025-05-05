@@ -7,6 +7,7 @@ import InventoryScreen from '../ManagerScreens/Inventory';
 import RevenueScreen from '../ManagerScreens/Revenue';
 import SettingScreen from '../ManagerScreens/Setting';
 import ManageRouter from '../ManagerRouters/ManageRouter';
+import SettingStack from '../ManagerRouters/SettingStack';
 
 const Tab = createBottomTabNavigator();
 
@@ -51,7 +52,7 @@ export default function ManagerMainRouter() {
       <Tab.Screen name="Manage" component={ManageRouter} />
       <Tab.Screen name="Inventory" component={InventoryScreen} />
       <Tab.Screen name="Revenue" component={RevenueScreen} />
-      <Tab.Screen name="Setting" component={SettingScreen} />
+      <Tab.Screen name="Setting" component={SettingStack} />
     </Tab.Navigator>
   );
 }
